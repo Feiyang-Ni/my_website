@@ -1,0 +1,322 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="Personal Portfolio Website for Feiyang Ni&#39;s Analytics Study">
+	<meta name="author" content="Feiyang Ni">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title>NYT Mask Use Acceptance &middot; Portfolio website for Feiyang Ni</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Feiyang Ni</strong> <span></span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="/">Home</a></li>
+            
+                <li><a href="/blogs">Blogs</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/blogs" class="button special fit">Get Started</a></li>
+            
+            
+                <li><a href="/" class="button fit">Log In</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>NYT Mask Use Acceptance</h1>
+                            </header>
+                            
+                            
+
+
+<div id="nyt-mask-use" class="section level2">
+<h2>NYT mask use</h2>
+<p>Github source for data <a href="https://github.com/nytimes/covid-19-data/tree/master/mask-use" class="uri">https://github.com/nytimes/covid-19-data/tree/master/mask-use</a></p>
+</div>
+<div id="getting-the-data" class="section level2">
+<h2>Getting the data</h2>
+<pre class="r"><code>#Source for data url &lt;- &quot;https://github.com/nytimes/covid-19-data/raw/master/mask-use/mask-use-by-county.csv&quot;
+
+nyt_mask_survey &lt;- read_csv(here::here(&quot;data&quot;, &quot;nyt_mask_survey.csv&quot;))
+
+nyt_mask_survey &lt;- nyt_mask_survey %&gt;%
+  clean_names() %&gt;% 
+  mutate(
+    mostly_yes= frequently+always,
+    mostly_no = never+rarely,
+    delta = mostly_yes-mostly_no
+  )
+
+glimpse(nyt_mask_survey)</code></pre>
+<pre><code>## Rows: 3,142
+## Columns: 9
+## $ countyfp   &lt;chr&gt; &quot;01001&quot;, &quot;01003&quot;, &quot;01005&quot;, &quot;01007&quot;, &quot;01009&quot;, &quot;01011&quot;, &quot;01…
+## $ never      &lt;dbl&gt; 0.053, 0.083, 0.067, 0.020, 0.053, 0.031, 0.102, 0.152, 0…
+## $ rarely     &lt;dbl&gt; 0.074, 0.059, 0.121, 0.034, 0.114, 0.040, 0.053, 0.108, 0…
+## $ sometimes  &lt;dbl&gt; 0.134, 0.098, 0.120, 0.096, 0.180, 0.144, 0.257, 0.130, 0…
+## $ frequently &lt;dbl&gt; 0.295, 0.323, 0.201, 0.278, 0.194, 0.286, 0.137, 0.167, 0…
+## $ always     &lt;dbl&gt; 0.444, 0.436, 0.491, 0.572, 0.459, 0.500, 0.451, 0.442, 0…
+## $ mostly_yes &lt;dbl&gt; 0.739, 0.759, 0.692, 0.850, 0.653, 0.786, 0.588, 0.609, 0…
+## $ mostly_no  &lt;dbl&gt; 0.127, 0.142, 0.188, 0.054, 0.167, 0.071, 0.155, 0.260, 0…
+## $ delta      &lt;dbl&gt; 0.612, 0.617, 0.504, 0.796, 0.486, 0.715, 0.433, 0.349, 0…</code></pre>
+</div>
+<div id="choropleth-map" class="section level2">
+<h2>Choropleth map</h2>
+<p>The FIPS code is a federal code that numbers states and territories of the US. It extends to the county level with an additional four digits, so every county in the US has a unique six-digit identifier, where the first two digits represent the state.</p>
+<p>We will be using Kieran Healy’s <code>socviz</code> package which among other things contains <code>county_map</code> and <code>county_data</code></p>
+<pre class="r"><code># America’s choropleths; use county_map that has all polygons 
+# and county data with demographics/election data from socviz datafile
+# The id field is the FIPS code for the county
+county_map %&gt;% 
+  sample_n(5)</code></pre>
+<pre><code>##       long      lat  order  hole piece            group    id
+## 1   882433   299632  87357 FALSE     1 0500000US26061.1 26061
+## 2   795576 -1249001  20671 FALSE     1 0500000US05043.1 05043
+## 3 -1687311   510419 178461 FALSE     1 0500000US53035.1 53035
+## 4 -1920791  -258706  29028 FALSE     1 0500000US06105.1 06105
+## 5  -165451   288525 127571 FALSE     1 0500000US38025.1 38025</code></pre>
+<pre class="r"><code>county_data %&gt;%
+    sample_n(5)</code></pre>
+<pre><code>##      id             name state census_region      pop_dens   pop_dens4
+## 1 17167  Sangamon County    IL       Midwest [  100,  500) [118,71672]
+## 2 20041 Dickinson County    KS       Midwest [   10,   50) [ 17,   45)
+## 3 42059    Greene County    PA     Northeast [   50,  100) [ 45,  118)
+## 4 48197  Hardeman County    TX         South [    0,   10) [  0,   17)
+## 5 17139  Moultrie County    IL       Midwest [   10,   50) [ 17,   45)
+##     pop_dens6   pct_black    pop female white black travel_time land_area
+## 1 [215,71672] [10.0,15.0) 198997   52.1  83.4  12.2        18.9       868
+## 2 [  9,   25) [ 0.0, 2.0)  19394   50.2  95.5   1.1        22.1       847
+## 3 [ 45,   82) [ 2.0, 5.0)  37843   48.2  95.0   3.4        26.9       576
+## 4 [  0,    9) [ 5.0,10.0)   3928   48.9  90.0   6.3        15.1       695
+## 5 [ 25,   45) [ 0.0, 2.0)  14837   51.3  98.3   0.4        22.1       336
+##   hh_income su_gun4 su_gun6  fips votes_dem_2016 votes_gop_2016
+## 1     55449 [ 0, 5) [ 4, 7) 17167          40731          49823
+## 2     48890 [ 5, 8) [ 7, 8) 20041           1582           5905
+## 3     44388 [ 8,11) [ 8,10) 42059           4157          10394
+## 4     36377 [ 0, 5) [ 0, 4) 48197            249           1207
+## 5     46622 [ 0, 5) [ 4, 7) 17139           1476           4453
+##   total_votes_2016 per_dem_2016 per_gop_2016 diff_2016 per_dem_2012
+## 1            96472        0.422        0.516      9092        0.446
+## 2             8008        0.198        0.737      4323        0.250
+## 3            14955        0.278        0.695      6237        0.405
+## 4             1511        0.165        0.799       958        0.202
+## 5             6209        0.238        0.717      2977        0.354
+##   per_gop_2012 diff_2012 winner partywinner16 winner12 partywinner12 flipped
+## 1        0.533      8170  Trump    Republican   Romney    Republican      No
+## 2        0.727      3747  Trump    Republican   Romney    Republican      No
+## 3        0.582      2421  Trump    Republican   Romney    Republican      No
+## 4        0.787       874  Trump    Republican   Romney    Republican      No
+## 5        0.625      1639  Trump    Republican   Romney    Republican      No</code></pre>
+<pre class="r"><code>glimpse(county_data)</code></pre>
+<pre><code>## Rows: 3,195
+## Columns: 32
+## $ id               &lt;chr&gt; &quot;0&quot;, &quot;01000&quot;, &quot;01001&quot;, &quot;01003&quot;, &quot;01005&quot;, &quot;01007&quot;, &quot;…
+## $ name             &lt;chr&gt; NA, &quot;1&quot;, &quot;Autauga County&quot;, &quot;Baldwin County&quot;, &quot;Barbo…
+## $ state            &lt;fct&gt; NA, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL,…
+## $ census_region    &lt;fct&gt; NA, South, South, South, South, South, South, South…
+## $ pop_dens         &lt;fct&gt; &quot;[   50,  100)&quot;, &quot;[   50,  100)&quot;, &quot;[   50,  100)&quot;, …
+## $ pop_dens4        &lt;fct&gt; &quot;[ 45,  118)&quot;, &quot;[ 45,  118)&quot;, &quot;[ 45,  118)&quot;, &quot;[118,…
+## $ pop_dens6        &lt;fct&gt; &quot;[ 82,  215)&quot;, &quot;[ 82,  215)&quot;, &quot;[ 82,  215)&quot;, &quot;[ 82,…
+## $ pct_black        &lt;fct&gt; &quot;[10.0,15.0)&quot;, &quot;[25.0,50.0)&quot;, &quot;[15.0,25.0)&quot;, &quot;[ 5.0…
+## $ pop              &lt;int&gt; 318857056, 4849377, 55395, 200111, 26887, 22506, 57…
+## $ female           &lt;dbl&gt; 50.8, 51.5, 51.5, 51.2, 46.5, 46.0, 50.6, 45.2, 53.…
+## $ white            &lt;dbl&gt; 77.7, 69.8, 78.1, 87.3, 50.2, 76.3, 96.0, 27.2, 54.…
+## $ black            &lt;dbl&gt; 13.2, 26.6, 18.4, 9.5, 47.6, 22.1, 1.8, 69.9, 43.6,…
+## $ travel_time      &lt;dbl&gt; 25.5, 24.2, 26.2, 25.9, 24.6, 27.6, 33.9, 26.9, 24.…
+## $ land_area        &lt;dbl&gt; 3531905, 50645, 594, 1590, 885, 623, 645, 623, 777,…
+## $ hh_income        &lt;int&gt; 53046, 43253, 53682, 50221, 32911, 36447, 44145, 32…
+## $ su_gun4          &lt;fct&gt; NA, NA, &quot;[11,54]&quot;, &quot;[11,54]&quot;, &quot;[ 5, 8)&quot;, &quot;[11,54]&quot;,…
+## $ su_gun6          &lt;fct&gt; NA, NA, &quot;[10,12)&quot;, &quot;[10,12)&quot;, &quot;[ 7, 8)&quot;, &quot;[10,12)&quot;,…
+## $ fips             &lt;dbl&gt; 0, 1000, 1001, 1003, 1005, 1007, 1009, 1011, 1013, …
+## $ votes_dem_2016   &lt;int&gt; NA, NA, 5908, 18409, 4848, 1874, 2150, 3530, 3716, …
+## $ votes_gop_2016   &lt;int&gt; NA, NA, 18110, 72780, 5431, 6733, 22808, 1139, 4891…
+## $ total_votes_2016 &lt;int&gt; NA, NA, 24661, 94090, 10390, 8748, 25384, 4701, 868…
+## $ per_dem_2016     &lt;dbl&gt; NA, NA, 0.2396, 0.1957, 0.4666, 0.2142, 0.0847, 0.7…
+## $ per_gop_2016     &lt;dbl&gt; NA, NA, 0.734, 0.774, 0.523, 0.770, 0.899, 0.242, 0…
+## $ diff_2016        &lt;int&gt; NA, NA, 12202, 54371, 583, 4859, 20658, 2391, 1175,…
+## $ per_dem_2012     &lt;dbl&gt; NA, NA, 0.266, 0.216, 0.513, 0.262, 0.123, 0.763, 0…
+## $ per_gop_2012     &lt;dbl&gt; NA, NA, 0.726, 0.774, 0.483, 0.731, 0.865, 0.235, 0…
+## $ diff_2012        &lt;int&gt; NA, NA, 11012, 47443, 334, 3931, 17780, 2808, 714, …
+## $ winner           &lt;chr&gt; NA, NA, &quot;Trump&quot;, &quot;Trump&quot;, &quot;Trump&quot;, &quot;Trump&quot;, &quot;Trump&quot;…
+## $ partywinner16    &lt;chr&gt; NA, NA, &quot;Republican&quot;, &quot;Republican&quot;, &quot;Republican&quot;, &quot;…
+## $ winner12         &lt;chr&gt; NA, NA, &quot;Romney&quot;, &quot;Romney&quot;, &quot;Obama&quot;, &quot;Romney&quot;, &quot;Rom…
+## $ partywinner12    &lt;chr&gt; NA, NA, &quot;Republican&quot;, &quot;Republican&quot;, &quot;Democrat&quot;, &quot;Re…
+## $ flipped          &lt;chr&gt; NA, NA, &quot;No&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, …</code></pre>
+<pre class="r"><code># we have data on 3195 FIPS....
+
+glimpse(county_map)</code></pre>
+<pre><code>## Rows: 191,382
+## Columns: 7
+## $ long  &lt;dbl&gt; 1225889, 1235324, 1244873, 1244129, 1272010, 1276797, 1273832,…
+## $ lat   &lt;dbl&gt; -1275020, -1274008, -1272331, -1267515, -1262889, -1295514, -1…
+## $ order &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,…
+## $ hole  &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,…
+## $ piece &lt;fct&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+## $ group &lt;fct&gt; 0500000US01001.1, 0500000US01001.1, 0500000US01001.1, 0500000U…
+## $ id    &lt;chr&gt; &quot;01001&quot;, &quot;01001&quot;, &quot;01001&quot;, &quot;01001&quot;, &quot;01001&quot;, &quot;01001&quot;, &quot;01001&quot;,…</code></pre>
+<pre class="r"><code># ... but to create a map, we translate these 3195 counties to 191,382 polygons!</code></pre>
+</div>
+<div id="joing-the-files" class="section level2">
+<h2>Joing the files</h2>
+<p>We have three files</p>
+<ol style="list-style-type: decimal">
+<li><code>nyt_mask_survey</code>, our NYT survey data,</li>
+<li><code>county_map</code> that has all polygons that define a county</li>
+<li><code>county_data</code> with demographics/election data.</li>
+</ol>
+<pre class="r"><code>county_full &lt;- left_join(county_map, county_data, by = &quot;id&quot;)
+
+county_masks_full &lt;- left_join(county_full, nyt_mask_survey, 
+                                by = c(&quot;id&quot;=&quot;countyfp&quot;))</code></pre>
+</div>
+<div id="building-our-choropleth-plot" class="section level2">
+<h2>Building our choropleth plot</h2>
+<pre class="r"><code>p &lt;- ggplot(data = county_masks_full,
+            mapping = aes(x = long, y = lat,
+                          fill = delta, 
+                          group = group))
+
+p1 &lt;- p + 
+  geom_polygon(color = &quot;gray90&quot;, size = 0.05) + 
+  coord_equal()
+
+
+
+p2 &lt;- p1 + 
+  scale_fill_gradient(low = &#39;#ffffcc&#39;, high= &#39;#006837&#39;)
+
+p3 &lt;- p1 + 
+  scale_fill_gradient2()
+
+# get different colours from https://colorbrewer2.org/
+# the one shown here is https://colorbrewer2.org/#type=diverging&amp;scheme=BrBG&amp;n=6
+p4 &lt;- p1 + 
+  scale_fill_gradientn(colours = c(&#39;#8c510a&#39;,&#39;#d8b365&#39;,&#39;#f6e8c3&#39;,&#39;#c7eae5&#39;,&#39;#5ab4ac&#39;,&#39;#01665e&#39;))
+
+p1</code></pre>
+<p><img src="/blogs/NYT_Masks_files/figure-html/plot_choropleths-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p2</code></pre>
+<p><img src="/blogs/NYT_Masks_files/figure-html/plot_choropleths-2.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p3</code></pre>
+<p><img src="/blogs/NYT_Masks_files/figure-html/plot_choropleths-3.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p4</code></pre>
+<p><img src="/blogs/NYT_Masks_files/figure-html/plot_choropleths-4.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p4 + labs(fill = &quot;Mask acceptance, (Mostly Yes - Mostly No)&quot;, 
+          caption = &quot;“Estimates from The New York Times, based on roughly 250,000 interviews \nconducted by Dynata from July 2 to July 14, 2020”&quot;) +
+  guides(fill = guide_legend(nrow = 1)) + 
+  theme_map() + 
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="/blogs/NYT_Masks_files/figure-html/plot_choropleths-5.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="checking-for-relationships" class="section level2">
+<h2>Checking for relationships</h2>
+<p>Does mask use acceptance have any relation with some demographics? Let us explor the relationship between country household income, population, and % who voted republican in 2016</p>
+<pre class="r"><code>county_masks_full %&gt;% 
+  select(hh_income, pop, per_gop_2016, delta) %&gt;% 
+  GGally::ggpairs()+
+  theme_minimal()</code></pre>
+<p><img src="/blogs/NYT_Masks_files/figure-html/ggpairs-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://www.facebook.com/profile.php?id=100027714471852" class="icon alt fa-facebook" target="_blank"><span class="label">Facebook</span></a></li>
+                
+                    <li><a href="https://www.instagram.com/ffinnocean/?hl=en" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+                
+                    <li><a href="https://github.com/Feiyang-Ni" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://www.linkedin.com/in/feiyang-ni-342a27183/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Company Name</li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>

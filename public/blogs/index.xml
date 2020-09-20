@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lifestyle on Portfolio website for Feiyang Ni</title>
+    <link>/blogs/</link>
+    <description>Recent content in Lifestyle on Portfolio website for Feiyang Ni</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 31 Oct 2017 22:27:21 -0500</lastBuildDate><atom:link href="/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AirBnB in Copenhagen</title>
+      <link>/blogs/blog3/</link>
+      <pubDate>Sat, 19 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog3/</guid>
+      <description>Executive Summary Overview The purpose of this report is to explore data on AirBnB listings in Copenhagen and understand the key drivers of price variability, specifically focused on the price for a 4-night stay for 2 guests.
+The Problem What is the best model to predict overall price of AirBnB accommodation in Copenhagen for 2 people wishing to spend 4 nights in the city?</description>
+    </item>
+    
+    <item>
+      <title>Climate Change</title>
+      <link>/blogs/blog2/</link>
+      <pubDate>Mon, 14 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog2/</guid>
+      <description>load packages #to study climate change, we use: data on the *Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies* in the Northern Hemisphere at [NASA&amp;#39;s Goddard Institute for Space Studies](https://data.giss.nasa.gov/gistemp) and the [tabular data of temperature anomalies can be found here](https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.txt) #we load this file using read_csv, skipping the first (redundant) row and coding NASAs NA&amp;#39;s (***) as &amp;quot;na&amp;quot; weather &amp;lt;- read_csv(&amp;quot;https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv&amp;quot;, skip = 1, na = &amp;quot;***&amp;quot;) ## Parsed with column specification: ## cols( ## Year = col_double(), ## Jan = col_double(), ## Feb = col_double(), ## Mar = col_double(), ## Apr = col_double(), ## May = col_double(), ## Jun = col_double(), ## Jul = col_double(), ## Aug = col_double(), ## Sep = col_double(), ## Oct = col_double(), ## Nov = col_double(), ## Dec = col_double(), ## `J-D` = col_double(), ## `D-N` = col_double(), ## DJF = col_double(), ## MAM = col_double(), ## JJA = col_double(), ## SON = col_double() ## ) #we inspect the dataframe&amp;#39;s key variables and structure skim(weather)  (#tab:inspecting_the_dataframe)Data summary          Name  weather    Number of rows  140    Number of columns  19    _______________________     Column type frequency:     numeric  19    ________________________     Group variables  None     Variable type: numeric</description>
+    </item>
+    
+    <item>
+      <title>General Social Survey</title>
+      <link>/blogs/blog1/</link>
+      <pubDate>Mon, 14 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog1/</guid>
+      <description>load packages library(tidyverse) # Load ggplot2, dplyr, and all the other tidyverse packages library(mosaic) library(ggthemes) library(lubridate) library(here) library(skimr) library(janitor) library(httr) library(readxl) library(vroom) library(infer) library(patchwork) library(kableExtra) library(scales) #we load in the gss2016 data, making sure NAs are coded in as required gss &amp;lt;- read_csv(here::here(&amp;quot;data&amp;quot;, &amp;quot;smallgss2016.csv&amp;quot;), na = c(&amp;quot;&amp;quot;, &amp;quot;Don&amp;#39;t know&amp;quot;, &amp;quot;No answer&amp;quot;, &amp;quot;Not applicable&amp;quot;,&amp;quot;NA&amp;quot;)) ## Parsed with column specification: ## cols( ## emailmin = col_double(), ## emailhr = col_double(), ## snapchat = col_character(), ## instagrm = col_character(), ## twitter = col_character(), ## sex = col_character(), ## degree = col_character() ## )  Instagram and Snapchat, by sex Can we estimate the population proportion of Snapchat or Instagram users in 2016?</description>
+    </item>
+    
+  </channel>
+</rss>

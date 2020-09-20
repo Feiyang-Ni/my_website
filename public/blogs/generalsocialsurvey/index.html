@@ -1,0 +1,356 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="Personal Portfolio Website for Feiyang Ni&#39;s Analytics Study">
+	<meta name="author" content="Feiyang Ni">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title> &middot; Portfolio website for Feiyang Ni</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Feiyang Ni</strong> <span></span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="/">Home</a></li>
+            
+                <li><a href="/blogs">Blogs</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/blogs" class="button special fit">Get Started</a></li>
+            
+            
+                <li><a href="/" class="button fit">Log In</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1></h1>
+                            </header>
+                            
+                            <pre><code class="language-{r" data-lang="{r">library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+library(infer)
+library(patchwork)
+library(kableExtra)
+library(scales)
+</code></pre><h1 id="general-social-survey-gss">General Social Survey (GSS)</h1>
+<pre><code class="language-{r," data-lang="{r,">
+#we load in the gss2016 data, making sure NAs are coded in as required
+
+gss &lt;- read_csv(here::here(&quot;data&quot;, &quot;smallgss2016.csv&quot;), 
+                na = c(&quot;&quot;, &quot;Don't know&quot;,
+                       &quot;No answer&quot;, &quot;Not applicable&quot;,&quot;NA&quot;))
+
+</code></pre><h2 id="instagram-and-snapchat-by-sex">Instagram and Snapchat, by sex</h2>
+<h3 id="can-we-estimate-the-population-proportion-of-snapchat-or-instagram-users-in-2016">Can we estimate the <em>population</em> proportion of Snapchat or Instagram users in 2016?</h3>
+<p><strong>(1) - Create a  new variable, <code>snap_insta</code> that is <em>Yes</em> if the respondent reported using any of Snapchat (<code>snapchat</code>) or Instagram (<code>instagrm</code>), and <em>No</em> if not. If the recorded value was NA for both of these questions, the value in your new variable should also be NA.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+#we code the snap_insta variable appropriately using case_when embedded in mutate()
+
+gss_snap_insta &lt;- gss %&gt;% 
+  mutate(snap_insta = case_when(
+    instagrm == 'Yes' | snapchat == 'Yes' ~ &quot;Yes&quot;,
+    is.na(instagrm) &amp; is.na(snapchat) ~ NA_character_,
+    TRUE ~ 'No'))
+  
+</code></pre><p><strong>(2) - Calculate the proportion of Yes’s for <code>snap_insta</code> among those who answered the question, i.e. excluding NAs.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+#we filter out and mutate to generate a neat proportion (by removing the final filter line, we would show the full proportions of yes and no)
+
+gss_proportion &lt;- gss_snap_insta %&gt;% 
+  filter(!is.na(snap_insta)) %&gt;% 
+  count(snap_insta) %&gt;% 
+  mutate(total=sum(n),freq = n/sum(n)) %&gt;% 
+  filter(snap_insta == 'Yes')
+
+#we produce a neat table summarizing the proportion
+gss_proportion %&gt;% 
+  kbl(col.names=c(&quot;Snap-Insta&quot;, &quot;Observations&quot;,&quot;Total Observations&quot;,&quot;Proportion&quot;)) %&gt;%
+  kable_styling()
+
+</code></pre><p><strong>(3) - Using the CI formula for proportions, please construct 95% CIs for men and women who used either Snapchat or Instagram</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+#we create proportions
+
+prop_snap_insta_male &lt;- 
+  sum(gss_snap_insta$snap_insta==&quot;Yes&quot; &amp; gss_snap_insta$sex == 'Male', na.rm=TRUE)/sum(!is.na(gss_snap_insta$snap_insta) &amp; gss_snap_insta$sex == &quot;Male&quot;)
+  
+prop_snap_insta_female &lt;- 
+  sum(gss_snap_insta$snap_insta==&quot;Yes&quot; &amp; gss_snap_insta$sex == 'Female', na.rm=TRUE)/sum(!is.na(gss_snap_insta$snap_insta) &amp; gss_snap_insta$sex == &quot;Female&quot;)
+
+# Male
+proportion_ci_social &lt;- gss_snap_insta %&gt;% 
+  filter(sex == 'Male') %&gt;% 
+  summarise(sex ='Male',se_social=sqrt(((prop_snap_insta_male)*(1-prop_snap_insta_male))/n()),count=n(), t_critical=qt(0.975,count-1),margin_of_error=t_critical*se_social,social_low=prop_snap_insta_male-margin_of_error,social_high=prop_snap_insta_male+margin_of_error)
+
+proportion_ci_social %&gt;% 
+  select(c(sex,social_low,social_high)) %&gt;% 
+  kbl(col.names=c(&quot;Sex&quot;,&quot;Proportion of Snapchat/Instagram Users: Lower Limit&quot;,&quot;Proportion of Snapchat/Instagram Users: Upper Limit&quot;)) %&gt;%
+  kable_styling()
+
+# Female
+proportion_ci_social &lt;- gss_snap_insta %&gt;% 
+  filter(sex == 'Female') %&gt;% 
+  summarise(sex ='Female',se_social=sqrt(((prop_snap_insta_female)*(1-prop_snap_insta_female))/n()),count=n(), t_critical=qt(0.975,count-1),margin_of_error=t_critical*se_social,social_low=prop_snap_insta_female-margin_of_error,social_high=prop_snap_insta_female+margin_of_error)
+
+proportion_ci_social %&gt;% 
+  select(c(sex,social_low,social_high)) %&gt;% 
+  kbl(col.names=c(&quot;Sex&quot;,&quot;Proportion of Snapchat/Instagram Users: Lower Limit&quot;,&quot;Proportion of Snapchat/Instagram Users: Upper Limit&quot;)) %&gt;%
+  kable_styling()
+
+</code></pre><h2 id="twitter-by-education-level">Twitter, by education level</h2>
+<h3 id="can-we-estimate-the-population-proportion-of-twitter-users-by-education-level-in-2016">Can we estimate the <em>population</em> proportion of Twitter users by education level in 2016?.</h3>
+<p>There are 5 education levels in variable <code>degree</code> which, in ascending order of years of education, are Lt high school, High School, Junior college, Bachelor, Graduate.</p>
+<p><strong>(1) - Turn <code>degree</code> from a character variable into a factor variable. Make sure the order is the correct one and that levels are not sorted alphabetically which is what R by default does.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+gss_level &lt;- gss
+gss_level$degree &lt;- ordered(factor(gss$degree), levels = c('Lt high school','High school','Junior college','Bachelor','Graduate'))
+   
+#we check the levels have been recoded correctly
+levels(gss_level$d)
+
+</code></pre><p><strong>(2) - Create a  new variable, <code>bachelor_graduate</code> that is <em>Yes</em> if the respondent has either a <code>Bachelor</code> or <code>Graduate</code> degree. As before, if the recorded value for either was NA, the value in your new variable should also be NA.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+gss_bachelor_graduate &lt;- gss_level %&gt;% 
+  mutate(
+    bachelor_graduate = case_when(
+      degree %in% c(&quot;Bachelor&quot;, &quot;Graduate&quot;) ~ &quot;Yes&quot;,
+      is.na(degree)  ~ NA_character_,
+      TRUE ~ &quot;No&quot;))
+  
+</code></pre><p><strong>(3) - Calculate the proportion of <code>bachelor_graduate</code> who do (Yes) and who don&rsquo;t (No) use twitter.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+# put two proportions together
+
+gss_prop_bach_tweet &lt;- gss_bachelor_graduate %&gt;%
+  filter((!is.na(bachelor_graduate)) &amp; (!is.na(twitter)) &amp; (bachelor_graduate == 'Yes')) %&gt;% 
+  count(twitter) %&gt;% 
+  mutate(total=sum(n), freq = n / sum(n))
+
+#we produce a neat table summarizing the proportion
+gss_prop_bach_tweet %&gt;% 
+  kbl(col.names=c(&quot;Twitter User?&quot;, &quot;Observations&quot;,&quot;Total Observations&quot;,&quot;Proportion&quot;)) %&gt;%
+  kable_styling()
+
+</code></pre><p><strong>(4) - Using the CI formula for proportions, please construct two 95% CIs for <code>bachelor_graduate</code> vs whether they use (Yes) and don&rsquo;t (No) use twitter.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+proportion_ci_yes &lt;- gss_bachelor_graduate %&gt;% 
+  filter(twitter == 'Yes') %&gt;% 
+  summarise(twitter='Yes',
+            se_twitter_yes=sqrt(((gss_prop_bach_tweet$freq[2])*(1-gss_prop_bach_tweet$freq[2]))/n()),
+            count=n(),
+            t_critical=qt(0.975,count-1),
+            margin_of_error=t_critical*se_twitter_yes,
+            yes_low=gss_prop_bach_tweet$freq[2]-margin_of_error,
+            yes_high=gss_prop_bach_tweet$freq[2]+margin_of_error)
+
+proportion_ci_yes %&gt;% 
+  select(c(twitter,yes_low,yes_high)) %&gt;% 
+  kbl(col.names=c(&quot;Twitter User?&quot;,&quot;Proportion of Twitter Users: Lower Limit&quot;,&quot;Proportion of Twitter Users: Upper Limit&quot;)) %&gt;%
+  kable_styling()
+
+proportion_ci_no &lt;- gss_bachelor_graduate %&gt;% 
+  filter(twitter == 'No') %&gt;% 
+  summarise(twitter = 'No',
+            se_twitter_no=sqrt(((gss_prop_bach_tweet$freq[1])*(1-gss_prop_bach_tweet$freq[1]))/n()),
+            count=n(),
+            t_critical=qt(0.975,count-1),
+            margin_of_error=t_critical*se_twitter_no,
+            no_low=gss_prop_bach_tweet$freq[1]-margin_of_error,
+            no_high=gss_prop_bach_tweet$freq[1]+margin_of_error)
+
+proportion_ci_no %&gt;% 
+  select(c(twitter,no_low,no_high)) %&gt;% 
+  kbl(col.names=c(&quot;Twitter User?&quot;,&quot;Proportion of Twitter Users: Lower Limit&quot;,&quot;Proportion of Twitter Users: Upper Limit&quot;)) %&gt;%
+  kable_styling()
+
+</code></pre><p><strong>(5) - Do these two Confidence Intervals overlap?</strong></p>
+<p>No, the tables above clearly demonstrate that there is no overlap in the 95% confidence intervals for Proportion of Twitter Users between respondents who have either a Bachelor&rsquo;s or Graduate degree. While the proportion of Bachelor&rsquo;s/Graduate degree-holders which use Twitter lies between 0.181 and 0.285, the proportion who do not use Twitter lies between 0.742 and 0.792.</p>
+<h2 id="email-usage">Email usage</h2>
+<h3 id="can-we-estimate-the-population-parameter-on-time-spent-on-email-weekly">Can we estimate the <em>population</em> parameter on time spent on email weekly?</h3>
+<p><strong>(1) - Create a new variable called <code>email</code> that combines <code>emailhr</code> and <code>emailmin</code> to reports the number of minutes the respondents spend on email weekly.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+#creating the email variable
+gss_email &lt;- gss_level %&gt;% 
+  mutate(email = emailhr * 60 + emailmin, email_hour = round(emailhr + emailmin / 60,1))
+
+#reviewing the characteristics of the email variable
+skim(gss_email$email)
+
+</code></pre><p><strong>(2) - Visualise the distribution of this new variable. Find the mean and the median number of minutes respondents spend on email weekly. Is the mean or the median a better measure of the typical amount of time Americans spend on email weekly? Why?</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+#we summarise the mean and median number of minutes spent on email weekly
+email_stats_mins &lt;- gss_email %&gt;% 
+  summarise(mean_email = mean(email,na.rm = TRUE), 
+            median_email = median(email,na.rm = TRUE)) 
+
+  kbl(email_stats_mins, col.names=c(&quot;Mean Amount of Time Spent on Email Weekly (Minutes)&quot;,&quot;Median Amount of Time Spent on Email Weekly (Minutes)&quot;)) %&gt;%
+  kable_styling()
+  
+#since hours are much more readily interpretable, we also quote this amount of time in hours
+email_stats_hours &lt;- gss_email %&gt;% 
+  summarise(mean_email = mean(email_hour,na.rm = TRUE), 
+            median_email = median(email_hour,na.rm = TRUE)) 
+
+  kbl(email_stats_hours, col.names=c(&quot;Mean Amount of Time Spent on Email Weekly (Hours)&quot;,&quot;Median Amount of Time Spent on Email Weekly (Hours)&quot;)) %&gt;%
+  kable_styling()
+  
+</code></pre><pre><code class="language-{r" data-lang="{r">
+#note: in both these plots, we have *not* plotted all outliers, which reach up to 6000 minutes per week - this is so that the core distribution of minutes is readily interpretable
+
+#we visualize the distribution of the email variable for the full sample
+
+ggplot(gss_email, aes(x = email)) + geom_boxplot() + labs(x=&quot;Amount of Time Spent on Email Weekly (Minutes)&quot;,title=&quot;Most Americans Spend Approximately 2 Hours Each Week On Emails&quot;,subtitle=&quot;Distribution of time spent on emails each week (minutes)&quot;, y=&quot;&quot;) + theme_fivethirtyeight() + theme(axis.title = element_text()) + theme(axis.text.y=element_blank()) + scale_x_continuous(breaks=seq(0, 1200, by = 50), limits=c(0,1200)) + geom_vline(xintercept=email_stats_mins$mean_email, size=0.5, color=&quot;red&quot;) + annotate(geom = 'text', label = &quot; Sample Mean&quot;, x = email_stats_mins$mean_email+10, y = 0.3, angle=270)
+ 
+#we viualize the distribution of the email variable, by education level
+
+gss_email %&gt;% 
+  filter(degree!=&quot;NA&quot;) %&gt;% 
+  ggplot(aes(x = email, y=degree)) + geom_boxplot() + labs(x=&quot;Amount of Time Spent on Email Weekly (Minutes)&quot;,title=&quot;On Average, More Educated Americans Spend More Time on Emails Each Week&quot;,subtitle=&quot;Distribution of time spent on emails each week (minutes), ordered by highest level of education obtained&quot;, y=&quot;&quot;) + theme_fivethirtyeight() + theme(axis.title = element_text()) + scale_x_continuous(breaks=seq(0, 1200, by = 50), limits=c(0,1200)) + geom_vline(xintercept=email_stats_mins$mean_email, size=0.5, color=&quot;red&quot;) + annotate(geom = 'text', label = &quot;Sample Mean&quot;, x = email_stats_mins$mean_email+10, y = 1.5, angle=270)
+
+</code></pre><p>Evidently, the the Median is a better measure of the typical amount of time Americans spend on email weekly, since the Mean (shown as red lines in each plot above) are significantly skewed by a large number of outliers above the upper quartile. In particular, when evaluating time spent on email across different levels of education, it becomes evident that the Mean grossly overestimates the time allocation, intersecting only with the interquartile ranges of those with the two highest levels of education, and being more than 100 minutes above the greatest median value.</p>
+<p><strong>(3) - Using the <code>infer</code> package, calculate a 95% bootstrap confidence interval for the mean amount of time Americans spend on email weekly. Interpret this interval in context of the data, reporting its endpoints in “humanized” units (e.g. instead of 108 minutes, report 1 hr and 48 minutes). If you get a result that seems a bit odd, discuss why you think this might be the case.</strong></p>
+<pre><code class="language-{r" data-lang="{r">
+set.seed(1234)
+
+email_boot &lt;- gss_email %&gt;%
+  specify(response = email) %&gt;% 
+  generate(reps = 1000, type = &quot;bootstrap&quot;) %&gt;%
+  calculate(stat = &quot;mean&quot;) 
+
+email_ci_95 &lt;- email_boot %&gt;% 
+  get_confidence_interval(level = 0.95, type = &quot;percentile&quot;) %&gt;% 
+  mutate(lower_ci_hr = lower_ci %/% 60,lower_ci_min = lower_ci %% 60,upper_ci_hr = upper_ci %/% 60, upper_ci_min = upper_ci %% 60)
+
+email_ci_95 %&gt;% 
+  select(c(lower_ci_hr,lower_ci_min,upper_ci_hr,upper_ci_min)) %&gt;% 
+  kbl(col.names=c(&quot;Mean Time Spent on Email Weekly: Lower Limit (Hours)&quot;, &quot;Mean Time Spent on Email Weekly: Lower Limit (Minutes)&quot;, &quot;Mean Time Spent on Email Weekly: Upper Limit (Hours)&quot;, &quot;Mean Time Spent on Email Weekly: Upper Limit (Minutes)&quot;)) %&gt;%
+  kable_styling()
+
+</code></pre><p>The 95% confidence interval states that we can be 95% confident that the mean amount of time Americans spend on email weekly is between 6 hours and 25 minutes and 7 hours and 33 minutes.</p>
+<p>We found the mean amount of time spent on email weekly for the sample to be 6 hours 52 minutes. This lies within the 95% confidence interval, and so is to be expected. However, there is evidently very significant positive skew (mean &gt; median) in the sample, which results from a substantial number of outliers who spend a huge amount of time (up to 100 hours) on email each week. This is why median is clearly a better measure of the typical amount of time Americans spend on email weekly.</p>
+<p><strong>(4) - Would you expect a 99% confidence interval to be wider or narrower than the interval you calculated above? Explain your reasoning.</strong></p>
+<p>A 99% confidence interval would be wider than the interval calculated above. This is because while on average, in a 95% confidence interval, 95 of every 100 confidence intervals will contain the true population parameter, in a 99% confidence interval, 99 will. In order to capture the true population parameter within 4 additional confidence intervals, the interval itself must be wider.</p>
+<p>This is evidenced below: while the 95% confidence interval had a range of 1 hour and 8 minutes, the 99% confidence interval has a range of 1 hour and 30 minutes.</p>
+<pre><code class="language-{r}" data-lang="{r}">
+set.seed(1234)
+
+email_ci_99 &lt;- email_boot %&gt;%
+  get_confidence_interval(level = 0.99, type = &quot;percentile&quot;) %&gt;% 
+  mutate(lower_ci_hr = lower_ci %/% 60,lower_ci_min = lower_ci %% 60,upper_ci_hr = upper_ci %/% 60, upper_ci_min = upper_ci %% 60)
+
+email_ci_99 %&gt;% 
+  select(c(lower_ci_hr,lower_ci_min,upper_ci_hr,upper_ci_min)) %&gt;% 
+  kbl(col.names=c(&quot;Mean Time Spent on Email Weekly: Lower Limit (Hours)&quot;, &quot;Mean Time Spent on Email Weekly: Lower Limit (Minutes)&quot;, &quot;Mean Time Spent on Email Weekly: Upper Limit (Hours)&quot;, &quot;Mean Time Spent on Email Weekly: Upper Limit (Minutes)&quot;)) %&gt;%
+  kable_styling()
+
+</code></pre>
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://www.facebook.com/profile.php?id=100027714471852" class="icon alt fa-facebook" target="_blank"><span class="label">Facebook</span></a></li>
+                
+                    <li><a href="https://www.instagram.com/ffinnocean/?hl=en" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+                
+                    <li><a href="https://github.com/Feiyang-Ni" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://www.linkedin.com/in/feiyang-ni-342a27183/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Company Name</li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>
